@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Slythm</string>
     <string name="game_view_content_description">game</string>
+    <string name="auto_start">This is auto Start</string>
 </resources>
