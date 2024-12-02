@@ -1,7 +1,5 @@
 package com.repidot.slythmclient;
 
-import static androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
@@ -12,16 +10,20 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Objects;
 
 
 public class MainActivity extends AppCompatActivity implements  TimePickerDialog.OnTimeSetListener{
@@ -30,12 +32,32 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
 
     private TextView time_text;
 
+    private static SharedPreferences alarm;
+    private static SharedPreferences.Editor alarmE;
+
+    private static CheckBox sun;
+    private static CheckBox mon;
+    private static CheckBox tue;
+    private static CheckBox wed;
+    private static CheckBox thu;
+    private static CheckBox fri;
+    private static CheckBox sat;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         time_text = findViewById(R.id.time_text);
+        alarm = getPreferences(Context.MODE_PRIVATE);
+        alarmE = alarm.edit();
+        sun = findViewById(R.id.checkBoxSunday);
+        mon = findViewById(R.id.checkBoxMonday);
+        tue = findViewById(R.id.checkBoxTuesday);
+        wed = findViewById(R.id.checkBoxWednesday);
+        thu = findViewById(R.id.checkBoxThursday);
+        fri = findViewById(R.id.checkBoxFriday);
+        sat = findViewById(R.id.checkBoxSaturday);
 
         Button time_btn = findViewById(R.id.time_btn);
 
@@ -47,6 +69,23 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // FLAG 추가 필요
                 this.startActivity(intent);
             }
+        }
+
+        Log.d("Time", String.valueOf(alarm.getInt("H", -1)));
+        if(alarm.getInt("H", -1) != -1) {
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.HOUR_OF_DAY, alarm.getInt("H", -1));
+            c.set(Calendar.MINUTE, alarm.getInt("M", -1));
+            c.set(Calendar.SECOND, 0);
+            updateTimeText(c);
+
+            sun.setChecked(alarm.getBoolean("sun", false));
+            mon.setChecked(alarm.getBoolean("mon", false));
+            tue.setChecked(alarm.getBoolean("tue", false));
+            wed.setChecked(alarm.getBoolean("wed", false));
+            thu.setChecked(alarm.getBoolean("thu", false));
+            fri.setChecked(alarm.getBoolean("fri", false));
+            sat.setChecked(alarm.getBoolean("sat", false));
         }
 
         //시간 설정
@@ -80,6 +119,19 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
 
         Log.d(TAG, "## onTimeSet ## ");
         Calendar c = Calendar.getInstance();
+        boolean[] week = {sun.isChecked(), mon.isChecked(), tue.isChecked(), wed.isChecked(), thu.isChecked(), fri.isChecked(), sat.isChecked()};
+
+        alarmE.putBoolean("sun", sun.isChecked());
+        alarmE.putBoolean("mon", mon.isChecked());
+        alarmE.putBoolean("tue", tue.isChecked());
+        alarmE.putBoolean("wed", wed.isChecked());
+        alarmE.putBoolean("thu", thu.isChecked());
+        alarmE.putBoolean("fri", fri.isChecked());
+        alarmE.putBoolean("sat", sat.isChecked());
+
+        alarmE.putInt("H", hourOfDay);
+        alarmE.putInt("M", minute);
+        alarmE.apply();
 
         c.set(Calendar.HOUR_OF_DAY, hourOfDay);
         c.set(Calendar.MINUTE, minute);
@@ -89,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
         updateTimeText(c);
 
         //알람설정정
-        startAlarm(c);
+        startAlarm(c, week);
     }
 
     /**
@@ -109,19 +161,30 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
      * @param c 시간
      */
     @SuppressLint("ScheduleExactAlarm")
-    private void startAlarm(Calendar c){
+    private void startAlarm(Calendar c, boolean[] week){
         Log.d(TAG, "## startAlarm ## ");
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlertReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_MUTABLE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
 
+        // 요일 설정
+        intent.putExtra("weekday", week);
+
+        Log.d("Check", Arrays.toString(intent.getBooleanArrayExtra("weekday")));
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_MUTABLE);
+        long selectTime = c.getTimeInMillis();
+
+        // 설정 시간이 현재 시간 이전일 때, 하루 뒤로 설정
         if(c.before(Calendar.getInstance())){
             c.add(Calendar.DATE, 1);
         }
 
-        //RTC_WAKE : 지정된 시간에 기기의 절전 모드를 해제하여 대기 중인 인텐트를 실행
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+        Log.d("Check", Arrays.toString(intent.getBooleanArrayExtra("weekday")));
 
+        //RTC_WAKE : 지정된 시간에 기기의 절전 모드를 해제하여 대기 중인 인텐트를 실행
+        //alarmManager.setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+
+        // 매일 반복
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, selectTime, pendingIntent);
     }
 
     /**
@@ -130,8 +193,14 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
     private void cancelAlarm(){
         Log.d(TAG, "## cancelAlarm ## ");
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlertReceiver.class);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        if(intent.getBooleanArrayExtra("weekday") != null) {
+            Log.d("remove", "removeWeekday");
+            intent.removeExtra("weekday");
+        }
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_MUTABLE);
+        alarmE.putInt("H", -1);
+        alarmE.apply();
 
         alarmManager.cancel(pendingIntent);
         time_text.setText("알람 취소");

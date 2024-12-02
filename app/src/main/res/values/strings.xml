@@ -2,4 +2,6 @@
     <string name="app_name">Slythm</string>
     <string name="game_view_content_description">game</string>
     <string name="auto_start">This is auto Start</string>
+    <string name="title_activity_alarm_starter">AlarmStarter</string>
+    <string name="title_activity_main2">MainActivity2</string>
 </resources>

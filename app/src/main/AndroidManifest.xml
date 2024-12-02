@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -18,9 +18,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SlythmTest"
         tools:targetApi="31">
-<!--        <activity-->
-<!--            android:name=".UnityHandlerActivity"-->
-<!--            android:exported="false"/>-->
+        <activity
+            android:name=".AlarmStarter"
+            android:exported="false"
+            android:label="@string/title_activity_alarm_starter"
+            android:theme="@style/Theme.SlythmTest" />
+        <!-- <activity -->
+        <!-- android:name=".UnityHandlerActivity" -->
+        <!-- android:exported="false"/> -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -30,6 +35,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".AlertReceiver"/>
+        <service android:name=".AlarmService"/>
+        <receiver android:name=".AlarmReceiver" />
     </application>
+
 </manifest>
