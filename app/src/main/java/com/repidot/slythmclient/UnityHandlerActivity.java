@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 //import com.unity3d.player.UnityPlayerGameActivity;
 
+import com.unity3d.player.UnityPlayerGameActivity;
+
 import java.util.Calendar;
 
 public class UnityHandlerActivity extends AppCompatActivity {
@@ -32,7 +34,7 @@ public class UnityHandlerActivity extends AppCompatActivity {
         buttonClick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Intent intent = new Intent(UnityHandlerActivity.this, UnityPlayerGameActivity.class);
+                Intent intent = new Intent(UnityHandlerActivity.this, UnityPlayerGameActivity.class);
                 startActivity(intent);
             }
         });

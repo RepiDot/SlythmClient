@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.SeekBar;
 
+import com.unity3d.player.UnityPlayerGameActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -38,10 +39,12 @@ public class AlarmStarter extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if(per == 100) {
-                    stopService(new Intent(getApplicationContext(), AlarmService.class));
-                    finishAffinity();
-                    System.runFinalization();
-                    System.exit(0);
+//                    stopService(new Intent(getApplicationContext(), AlarmService.class));
+//                    finishAffinity();
+//                    System.runFinalization();
+//                    System.exit(0);
+                    Intent intent = new Intent(new Intent(getApplicationContext(), UnityPlayerGameActivity.class));
+                    startActivity(intent);
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         seekBar.setProgress(0, true);

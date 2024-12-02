@@ -35,13 +35,13 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
     private static SharedPreferences alarm;
     private static SharedPreferences.Editor alarmE;
 
-    private static CheckBox sun;
-    private static CheckBox mon;
-    private static CheckBox tue;
-    private static CheckBox wed;
-    private static CheckBox thu;
-    private static CheckBox fri;
-    private static CheckBox sat;
+    private CheckBox sun;
+    private CheckBox mon;
+    private CheckBox tue;
+    private CheckBox wed;
+    private CheckBox thu;
+    private CheckBox fri;
+    private CheckBox sat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,19 +107,16 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
         });
     }
 
-
-    /**
-     * 시간을 정하면 호출되는 메소드
-     * @param view 화면
-     * @param hourOfDay 시간
-     * @param minute 분
-     */
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
         Log.d(TAG, "## onTimeSet ## ");
         Calendar c = Calendar.getInstance();
+
         boolean[] week = {sun.isChecked(), mon.isChecked(), tue.isChecked(), wed.isChecked(), thu.isChecked(), fri.isChecked(), sat.isChecked()};
+        if(!(sun.isChecked() || mon.isChecked() || tue.isChecked() || wed.isChecked() || thu.isChecked() || fri.isChecked() || sat.isChecked())) {
+            week = null;
+        }
 
         alarmE.putBoolean("sun", sun.isChecked());
         alarmE.putBoolean("mon", mon.isChecked());
@@ -144,25 +141,14 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
         startAlarm(c, week);
     }
 
-    /**
-     * 화면에 사용자가 선택한 시간을 보여주는 메소드
-     * @param c 시간
-     */
     private void updateTimeText(Calendar c){
-
-        Log.d(TAG, "## updateTimeText ## ");
         String timeText = "알람시간: ";
         timeText += DateFormat.getTimeInstance(DateFormat.SHORT).format(c.getTime());
         time_text.setText(timeText);
     }
 
-    /**
-     * 알람 시작
-     * @param c 시간
-     */
     @SuppressLint("ScheduleExactAlarm")
     private void startAlarm(Calendar c, boolean[] week){
-        Log.d(TAG, "## startAlarm ## ");
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
 
@@ -187,11 +173,7 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, selectTime, pendingIntent);
     }
 
-    /**
-     * 알람 취소
-     */
     private void cancelAlarm(){
-        Log.d(TAG, "## cancelAlarm ## ");
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
         if(intent.getBooleanArrayExtra("weekday") != null) {
@@ -206,31 +188,3 @@ public class MainActivity extends AppCompatActivity implements  TimePickerDialog
         time_text.setText("알람 취소");
     }
 }
-
-
-
-
-
-
-//import android.content.Intent;
-//import android.os.Bundle;
-//
-//import androidx.activity.EdgeToEdge;
-//import androidx.appcompat.app.AppCompatActivity;
-//
-//import com.unity3d.player.UnityPlayerGameActivity;
-//
-//public class MainActivity extends AppCompatActivity {
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        EdgeToEdge.enable(this);
-//        setContentView(R.layout.activity_main);
-//
-//        this.getBaseContext();
-//
-//        Intent intent = new Intent(MainActivity.this, UnityHandlerActivity.class);
-//        startActivity(intent);
-//    }
-//}
